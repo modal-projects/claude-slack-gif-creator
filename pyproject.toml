@@ -1,0 +1,18 @@
+[project]
+name = "claude-slack-gif-creator"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.10"
+dependencies = [
+    "modal>=0.65.66",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+select = ['E', 'F', 'W', 'I']
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-third-party = ["modal"]
