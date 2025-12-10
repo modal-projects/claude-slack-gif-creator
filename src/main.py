@@ -115,6 +115,50 @@ def run_claude_turn(sb: modal.Sandbox, user_message: str, channel: str, thread_t
         yield {"response": "No GIF generated"}
 
 
+def process_message(body, client, user_message, files):
+    """Common logic for processing messages (mentions and thread replies)."""
+    channel = body["event"]["channel"]
+    thread_ts = body["event"].get("thread_ts", body["event"]["ts"])
+
+    sandbox_name = f"gif-{body['team_id']}-{thread_ts}".replace(".", "-")
+
+    try:
+        sb = modal.Sandbox.from_name(app_name=app.name, name=sandbox_name)
+    except modal.exception.NotFoundError:
+        sb = modal.Sandbox.create(
+            app=app,
+            image=sandbox_image,
+            secrets=[anthropic_secret] + ([slack_secret] if DEBUG_TOOL_USE else []),
+            volumes={VOL_MOUNT_PATH: vol},
+            workdir="/app",
+            env={"CLAUDE_CONFIG_DIR": VOL_MOUNT_PATH.as_posix() + "/claude-config"},
+            idle_timeout=20 * 60,
+            timeout=5 * 60 * 60,
+            name=sandbox_name,
+        )
+
+    data_dir = (VOL_MOUNT_PATH / sandbox_name).as_posix()
+    sb.exec("bash", "-c", f"mkdir -p {data_dir} && ln -s {data_dir} /data")
+
+    if files:
+        uploaded = upload_images_to_sandbox(sb, files, os.environ["SLACK_BOT_TOKEN"])
+        if uploaded:
+            user_message += f"\n\nUploaded images: {', '.join(uploaded)}"
+
+    for result in run_claude_turn(sb, user_message, channel, thread_ts, sandbox_name):
+        if result.get("response"):
+            client.chat_postMessage(
+                channel=channel, text=result["response"], thread_ts=thread_ts
+            )
+
+        if result.get("gif_path"):
+            client.files_upload_v2(
+                channel=channel,
+                file=result["gif_path"],
+                thread_ts=thread_ts,
+                title="Generated Emoji GIF",
+            )
+
 @app.function(secrets=[slack_secret], image=slack_bot_image, scaledown_window=10 * 60, min_containers=1)
 @modal.concurrent(max_inputs=100)
 @modal.asgi_app()
@@ -131,50 +175,6 @@ def slack_bot():
     fastapi_app = FastAPI()
     handler = SlackRequestHandler(slack_app)
 
-    def process_message(body, client, user_message, files):
-        """Common logic for processing messages (mentions and thread replies)."""
-        channel = body["event"]["channel"]
-        thread_ts = body["event"].get("thread_ts", body["event"]["ts"])
-
-        sandbox_name = f"gif-{body['team_id']}-{thread_ts}".replace(".", "-")
-
-        try:
-            sb = modal.Sandbox.from_name(app_name=app.name, name=sandbox_name)
-        except modal.exception.NotFoundError:
-            sb = modal.Sandbox.create(
-                app=app,
-                image=sandbox_image,
-                secrets=[anthropic_secret] + ([slack_secret] if DEBUG_TOOL_USE else []),
-                volumes={VOL_MOUNT_PATH: vol},
-                workdir="/app",
-                env={"CLAUDE_CONFIG_DIR": VOL_MOUNT_PATH.as_posix() + "/claude-config"},
-                idle_timeout=20 * 60,
-                timeout=5 * 60 * 60,
-                name=sandbox_name,
-            )
-
-        data_dir = (VOL_MOUNT_PATH / sandbox_name).as_posix()
-        sb.exec("bash", "-c", f"mkdir -p {data_dir} && ln -s {data_dir} /data")
-
-        if files:
-            uploaded = upload_images_to_sandbox(sb, files, os.environ["SLACK_BOT_TOKEN"])
-            if uploaded:
-                user_message += f"\n\nUploaded images: {', '.join(uploaded)}"
-
-        for result in run_claude_turn(sb, user_message, channel, thread_ts, sandbox_name):
-            if result.get("response"):
-                client.chat_postMessage(
-                    channel=channel, text=result["response"], thread_ts=thread_ts
-                )
-
-            if result.get("gif_path"):
-                client.files_upload_v2(
-                    channel=channel,
-                    file=result["gif_path"],
-                    thread_ts=thread_ts,
-                    title="Generated Emoji GIF",
-                )
-
     @slack_app.event("app_mention")
     def handle_mention(body, client, context, logger):
         user_message = body["event"]["text"]
@@ -190,6 +190,21 @@ def slack_bot():
         if "thread_ts" not in event:
             return
         if f"<@{context.bot_user_id}>" in event.get("text", ""):
+            return
+
+        try:
+            history = client.conversations_replies(
+                channel=event["channel"],
+                ts=event["thread_ts"],
+                limit=1,
+            )
+            if (
+                not history.get("messages")
+                or f"<@{context.bot_user_id}>" not in history["messages"][0].get("text", "")
+            ):
+                print("Skipping message because it's not a reply to the bot")
+                return
+        except Exception:
             return
 
         user_message = event["text"]
