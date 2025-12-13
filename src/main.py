@@ -5,10 +5,12 @@ from pathlib import Path
 
 import modal
 
+from .proxy import anthropic_proxy, app as proxy_app
+
 app = modal.App("slack-gif-creator")
+app.include(proxy_app)
 
 slack_secret = modal.Secret.from_name("claude-code-slackbot-secret")  # SLACK_BOT_TOKEN, SLACK_SIGNING_SECRET
-anthropic_secret = modal.Secret.from_name("anthropic-secret")  # ANTHROPIC_API_KEY
 
 vol = modal.Volume.from_name("gif-workspace", create_if_missing=True)
 
@@ -128,10 +130,13 @@ def process_message(body, client, user_message, files):
         sb = modal.Sandbox.create(
             app=app,
             image=sandbox_image,
-            secrets=[anthropic_secret] + ([slack_secret] if DEBUG_TOOL_USE else []),
+            secrets=[slack_secret] if DEBUG_TOOL_USE else [],
             volumes={VOL_MOUNT_PATH: vol},
             workdir="/app",
-            env={"CLAUDE_CONFIG_DIR": VOL_MOUNT_PATH.as_posix() + "/claude-config"},
+            env={
+                "CLAUDE_CONFIG_DIR": VOL_MOUNT_PATH.as_posix() + "/claude-config",
+                "ANTHROPIC_BASE_URL": anthropic_proxy.get_web_url(),
+            },
             idle_timeout=20 * 60,
             timeout=5 * 60 * 60,
             name=sandbox_name,

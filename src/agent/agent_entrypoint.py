@@ -4,6 +4,7 @@
 import argparse
 import asyncio
 import json
+import os
 from pathlib import Path
 
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient, HookMatcher, ResultMessage
@@ -85,6 +86,10 @@ def save_session_id(sandbox_name: str, session_id: str) -> None:
 
 
 async def main(user_msg: str, sandbox_name: str, channel: str, thread_ts: str):
+    # Use the sandbox ID as the API key for the proxy. The proxy will exchange it
+    # for the real key, as long as the sandbox is still running.
+    os.environ["ANTHROPIC_API_KEY"] = os.environ.get("MODAL_SANDBOX_ID", "")
+
     if channel and thread_ts:
         logger = SlackLogger(channel, thread_ts)
         hooks = {
