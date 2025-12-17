@@ -29,10 +29,31 @@ on serverless GPUs or in sandboxed containers.
 ## Architecture
 
 The bot consists of three main components:
+a Slack Bot Server,
+a Claude Agent Sandbox,
+and an Anthropic API Proxy.
 
-1. **Slack Bot** (`src/main.py`): Handles Slack events (mentions and thread replies) and manages [Modal Sandboxes](https://modal.com/docs/guide/sandbox)
-2. **Claude Agent** (`src/agent/agent_entrypoint.py`): Runs inside Modal Sandboxes and executes Claude with the GIF creation skill
-3. **Anthropic API Proxy** (`src/proxy.py`): Proxies requests to the Anthropic API.
+### Slack Bot Server
+
+This component handles Slack events (mentions and thread replies) and manages [Modal Sandboxes](https://modal.com/docs/guide/sandbox).
+It's a simple [FastAPI ASGI app](https://modal.com/docs/guide/webhooks) hosted on Modal.
+
+### Claude Agent Sandbox
+
+This component runs a Claude client and executes Claude skills,
+like Bash execution and GIF creation.
+
+Because these skills are tantamount to giving the agent total control over the computing environment
+and we are going to allow anyone who can access the bot to prompt the agent,
+we need to isolate and secure this component.
+To that tend, it runs inside a Modal [Sandbox](https://modal.com/docs/guide/sandbox).
+Modal can readily scale to [hundreds or thousands of Sandboxes](https://modal.com/blog/modal-vibe).
+
+Each Slack thread gets its own persistent [Modal Sandbox](https://modal.com/docs/guide/sandbox) with a dedicated [Volume](https://modal.com/docs/guide/volumes) for storing generated GIFs and session data.
+
+### Anthropic API Proxy
+
+This component proxies requests to the Anthropic API.
 
 The proxy keeps the API key out of the Sandbox.
 It's included so that Claude can't leak your API key when
@@ -40,8 +61,6 @@ a naughty prompt hacker asks for a GIF containing it,
 as in the (mock) example below.
 
 ![Fake API keys revealed in a GIF](./assets/mocked-pwn.gif)
-
-Each Slack thread gets its own persistent [Modal Sandbox](https://modal.com/docs/guide/sandbox) with a dedicated [Volume](https://modal.com/docs/guide/volumes) for storing generated GIFs and session data.
 
 ## Prerequisites
 
@@ -150,7 +169,7 @@ Reply to the bot's messages in a thread to continue the conversation:
 
 > the text runs off the screen, fix the wrapping
 
-![](./assets/claude-gif-gif.gif)
+![A bot powered by Claude that creates custom Slackmoji-ready GIFs](./assets/claude-gif-gif.gif)
 
 ## How It Works
 
@@ -165,13 +184,14 @@ Reply to the bot's messages in a thread to continue the conversation:
 
 ## Debug Mode
 
-Set `DEBUG_TOOL_USE = True` in `src/main.py:20` to enable real-time tool logging in Slack threads.
+Set `DEBUG_TOOL_USE = True` in `src/main.py` to enable real-time tool logging in Slack threads.
 
 ## Resources
 
 - [Modal Documentation](https://modal.com/docs)
+- [Modal Sandboxes](https://modal.com/products/sandboxes)
 - [Claude Agent SDK](https://github.com/anthropics/anthropic-sdk-python)
 - [Slack API Documentation](https://api.slack.com/)
 - [Slack Bolt Framework](https://slack.dev/bolt-python/)
 - [Building Slack Apps](https://api.slack.com/start)
-- [slack-gif-creator Skill](https://github.com/anthropics/skills/tree/main/slack-gif-creator)
+- [`slack-gif-creator` Skill](https://github.com/anthropics/skills/tree/main/slack-gif-creator)
