@@ -1,8 +1,8 @@
 # Claude Slack GIF Creator
 
-![](./assets/claude-pelican-bicycle.gif)
-![](./assets/agi-party.gif)
-![](./assets/gongy-ships.gif)
+![Pelican riding a bicycle](./assets/claude-pelican-bicycle.gif)
+![Are you feeling the AGI?](./assets/agi-party.gif)
+![Gongy ships](./assets/gongy-ships.gif)
 
 A bot powered by Claude that creates custom Slackmoji-ready GIFs.
 
@@ -13,10 +13,15 @@ Or, in GIF form:
 The bot runs on [Modal](https://modal.com/) and uses the [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview)
 with the [`slack-gif-creator` skill from Anthropic](https://github.com/anthropics/skills/blob/main/skills/slack-gif-creator/SKILL.md).
 
+[Modal](https://modal.com/playground) is an AI infrastructure platform that helps you run everything from
+[protein folding](https://modal.com/docs/examples/esm3)
+to [fine-tuning](https://modal.com/docs/examples/diffusers_lora_finetune)
+on serverless GPUs or in sandboxed containers.
+
 ## Features
 
 - **Natural Language GIF Generation**: Describe what you want and Claude will create a 128x128 emoji-optimized GIF
-- **Thread-Based Conversations**: Each Slack thread maintains its own conversation context, stored on Modal
+- **Persistent Threads**: Each Slack thread creates a conversation context, persisted on Modal
 - **Image Upload Support**: Upload images to the bot to incorporate them into your GIFs
 - **Background Removal**: Backgrounds removed using the `rembg` tool, so you can make GIFs of your friends
 - **Real-time Tool Logging**: See Claude's tool usage in the Slack thread as it works
@@ -27,7 +32,14 @@ The bot consists of three main components:
 
 1. **Slack Bot** (`src/main.py`): Handles Slack events (mentions and thread replies) and manages [Modal Sandboxes](https://modal.com/docs/guide/sandbox)
 2. **Claude Agent** (`src/agent/agent_entrypoint.py`): Runs inside Modal Sandboxes and executes Claude with the GIF creation skill
-3. **Anthropic API Proxy** (`src/proxy.py`): Proxies requests to the Anthropic API. This keeps the API key out of the Sandbox, so that Claude can't leak your API key when a naughty prompt hacker asks for a GIF containing it
+3. **Anthropic API Proxy** (`src/proxy.py`): Proxies requests to the Anthropic API.
+
+The proxy keeps the API key out of the Sandbox.
+It's included so that Claude can't leak your API key when
+a naughty prompt hacker asks for a GIF containing it,
+as in the (mock) example below.
+
+![Fake API keys revealed in a GIF](./assets/mocked-pwn.gif)
 
 Each Slack thread gets its own persistent [Modal Sandbox](https://modal.com/docs/guide/sandbox) with a dedicated [Volume](https://modal.com/docs/guide/volumes) for storing generated GIFs and session data.
 
@@ -107,17 +119,17 @@ Mention the bot in any channel with a description of the GIF you want:
 
 > @GIFBot create a GIF of a pelican riding a bicycle
 
-![](./assets/claude-pelican-bicycle.gif)
+![Pelican riding a bicycle](./assets/claude-pelican-bicycle.gif)
 
 ### Upload Images
 
 Attach images to your message for the bot to incorporate:
 
-> @GIFBot make a party GIF of this entity that flashes "AGI"
+> @GIFBot make a party GIF of this entity that flashes the letters "AGI"
 
 > [attach image]
 
-![](./assets/agi-party.gif)
+![Are you feeling the AGI?](./assets/agi-party.gif)
 
 
 ### Background Removal
@@ -128,7 +140,7 @@ Request background removal for transparent GIFs:
 
 > [attach image with background]
 
-![](./assets/gongy-ships.gif)
+![Gongy ships](./assets/gongy-ships.gif)
 
 ### Thread Replies
 
@@ -151,17 +163,7 @@ Reply to the bot's messages in a thread to continue the conversation:
 7. The generated GIF is uploaded back to the Slack thread
 8. The sandbox remains alive for 20 minutes for follow-up requests
 
-## Development
-
-### Local Development
-
-You can test the agent without the Slack integration by running it in a Modal Sandbox:
-
-```bash
-modal run src/main.py
-```
-
-### Debug Mode
+## Debug Mode
 
 Set `DEBUG_TOOL_USE = True` in `src/main.py:20` to enable real-time tool logging in Slack threads.
 
