@@ -91,6 +91,7 @@ modal setup
 Your Slack app needs:
 
 [**OAuth Scopes**](https://api.slack.com/scopes)
+
 - `app_mentions:read`
 - `chat:write`
 - `files:read`
@@ -101,6 +102,7 @@ Your Slack app needs:
 - `mpim:history`
 
 [**Event Subscriptions**](https://api.slack.com/apis/connections/events-api):
+
 - `app_mention`
 - `message.channels`
 - `message.groups`
@@ -112,12 +114,13 @@ Your Slack app needs:
 Create two Modal [Secrets](https://modal.com/docs/guide/secrets):
 
 **anthropic-secret** with:
+
 - `ANTHROPIC_API_KEY`: Your Anthropic API key
 
 **claude-code-slackbot-secret** with:
+
 - `SLACK_BOT_TOKEN`: Your [Slack bot token](https://api.slack.com/authentication/token-types#bot) (starts with `xoxb-`)
 - `SLACK_SIGNING_SECRET`: Your Slack app's [signing secret](https://api.slack.com/authentication/verifying-requests-from-slack#about)
-
 
 ### 4. Deploy to Modal
 
@@ -148,7 +151,6 @@ Attach images to your message for the bot to incorporate:
 > [attach image]
 
 ![Are you feeling the AGI?](https://modal-cdn.com/claude-slack-gif-creator/agi-party.gif)
-
 
 ### Background Removal
 
