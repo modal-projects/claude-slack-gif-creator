@@ -1,14 +1,16 @@
 # Claude Slack GIF Creator
 
-![Pelican riding a bicycle](./assets/claude-pelican-bicycle.gif)
-![Are you feeling the AGI?](./assets/agi-party.gif)
-![Gongy ships](./assets/gongy-ships.gif)
+![Pelican riding a bicycle](https://modal-cdn.com/claude-slack-gif-creator/claude-pelican-bicycle.gif)
+![Are you feeling the AGI?](https://modal-cdn.com/claude-slack-gif-creator/agi-party.gif)
+![Gongy ships](https://modal-cdn.com/claude-slack-gif-creator/gongy-ships.gif)
 
-A bot powered by Claude that creates custom Slackmoji-ready GIFs.
+[This repo](https://github.com/modal-projects/claude-slack-gif-creator)
+shows how to build
+a bot powered by Claude that creates custom Slackmoji-ready GIFs.
 
 Or, in GIF form:
 
-![A bot powered by Claude that creates custom Slackmoji-ready GIFs](./assets/claude-gif-gif.gif)
+![A bot powered by Claude that creates custom Slackmoji-ready GIFs](https://modal-cdn.com/claude-slack-gif-creator/claude-gif-gif.gif)
 
 The bot runs on [Modal](https://modal.com/) and uses the [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview)
 with the [`slack-gif-creator` skill from Anthropic](https://github.com/anthropics/skills/blob/main/skills/slack-gif-creator/SKILL.md).
@@ -60,7 +62,7 @@ It's included so that Claude can't leak your API key when
 a naughty prompt hacker asks for a GIF containing it,
 as in the (mock) example below.
 
-![Fake API keys revealed in a GIF](./assets/mocked-pwn.gif)
+![Fake API keys revealed in a GIF](https://modal-cdn.com/claude-slack-gif-creator/mocked-pwn.gif)
 
 ## Prerequisites
 
@@ -138,7 +140,7 @@ Mention the bot in any channel with a description of the GIF you want:
 
 > @GIFBot create a GIF of a pelican riding a bicycle
 
-![Pelican riding a bicycle](./assets/claude-pelican-bicycle.gif)
+![Pelican riding a bicycle](https://modal-cdn.com/claude-slack-gif-creator/claude-pelican-bicycle.gif)
 
 ### Upload Images
 
@@ -148,7 +150,7 @@ Attach images to your message for the bot to incorporate:
 
 > [attach image]
 
-![Are you feeling the AGI?](./assets/agi-party.gif)
+![Are you feeling the AGI?](https://modal-cdn.com/claude-slack-gif-creator/agi-party.gif)
 
 
 ### Background Removal
@@ -159,7 +161,7 @@ Request background removal for transparent GIFs:
 
 > [attach image with background]
 
-![Gongy ships](./assets/gongy-ships.gif)
+![Gongy ships](https://modal-cdn.com/claude-slack-gif-creator/gongy-ships.gif)
 
 ### Thread Replies
 
@@ -169,7 +171,7 @@ Reply to the bot's messages in a thread to continue the conversation:
 
 > the text runs off the screen, fix the wrapping
 
-![A bot powered by Claude that creates custom Slackmoji-ready GIFs](./assets/claude-gif-gif.gif)
+![A bot powered by Claude that creates custom Slackmoji-ready GIFs](https://modal-cdn.com/claude-slack-gif-creator/claude-gif-gif.gif)
 
 ## How It Works
 
