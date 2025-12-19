@@ -1,8 +1,10 @@
 # Claude Slack GIF Creator
 
-![Pelican riding a bicycle](https://modal-cdn.com/claude-slack-gif-creator/claude-pelican-bicycle.gif)
-![Are you feeling the AGI?](https://modal-cdn.com/claude-slack-gif-creator/agi-party.gif)
-![Gongy ships](https://modal-cdn.com/claude-slack-gif-creator/gongy-ships.gif)
+<p align="center">
+  <img src="https://modal-cdn.com/claude-slack-gif-creator/claude-pelican-bicycle.gif" style="display:inline-block;">
+  <img src="https://modal-cdn.com/claude-slack-gif-creator/agi-party.gif" style="display:inline-block;">
+  <img src="https://modal-cdn.com/claude-slack-gif-creator/gongy-ships.gif" style="display:inline-block;">
+</p>
 
 [This repo](https://github.com/modal-projects/claude-slack-gif-creator)
 shows how to build
@@ -14,11 +16,6 @@ Or, in GIF form:
 
 The bot runs on [Modal](https://modal.com/) and uses the [Claude Agent SDK](https://platform.claude.com/docs/en/agent-sdk/overview)
 with the [`slack-gif-creator` skill from Anthropic](https://github.com/anthropics/skills/blob/main/skills/slack-gif-creator/SKILL.md).
-
-[Modal](https://modal.com/playground) is an AI infrastructure platform that helps you run everything from
-[protein folding](https://modal.com/docs/examples/esm3)
-to [fine-tuning](https://modal.com/docs/examples/diffusers_lora_finetune)
-on serverless GPUs or in sandboxed containers.
 
 ## Features
 
