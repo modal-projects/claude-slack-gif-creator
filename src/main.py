@@ -28,10 +28,10 @@ sandbox_image = (
     .run_commands(
         # Clone skill from GitHub
         "git clone --depth 1 --filter=blob:none --sparse https://github.com/anthropics/skills.git /tmp/skills-repo",
-        "cd /tmp/skills-repo && git sparse-checkout set slack-gif-creator",
+        "cd /tmp/skills-repo && git sparse-checkout set skills/slack-gif-creator",
         # Set up skill for SDK discovery at /app/.claude/skills/
         "mkdir -p /app/.claude/skills",
-        "mv /tmp/skills-repo/slack-gif-creator /app/.claude/skills/slack_gif_creator",
+        "mv /tmp/skills-repo/skills/slack-gif-creator /app/.claude/skills/slack_gif_creator",
         "rm -rf /tmp/skills-repo",
     )
     .run_commands("pip install -r /app/.claude/skills/slack_gif_creator/requirements.txt")
